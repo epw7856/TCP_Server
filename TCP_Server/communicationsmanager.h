@@ -2,6 +2,7 @@
 #define COMMUNICATIONSMANAGER_H
 
 #include <memory>
+#include <QReadWriteLock>
 #include <QObject>
 
 class QTcpServer;
@@ -14,8 +15,8 @@ class CommunicationsManager : public QObject
 public:
     CommunicationsManager();
     ~CommunicationsManager();
-    bool isServerListening() const;
-    bool isClientConnected() const;
+    bool isServerListening();
+    bool isClientConnected();
 
 public slots:
     void startServer();
@@ -37,6 +38,7 @@ private:
     std::unique_ptr<QTcpSocket> socket;
     bool serverListening = false;
     bool clientConnected = false;
+    QReadWriteLock lock;
 };
 
 #endif // COMMUNICATIONSMANAGER_H

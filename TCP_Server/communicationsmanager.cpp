@@ -9,13 +9,15 @@ CommunicationsManager::CommunicationsManager()
 
 CommunicationsManager::~CommunicationsManager() = default;
 
-bool CommunicationsManager::isServerListening() const
+bool CommunicationsManager::isServerListening()
 {
+    QReadLocker locker(&lock);
     return serverListening;
 }
 
-bool CommunicationsManager::isClientConnected() const
+bool CommunicationsManager::isClientConnected()
 {
+    QReadLocker locker(&lock);
     return clientConnected;
 }
 

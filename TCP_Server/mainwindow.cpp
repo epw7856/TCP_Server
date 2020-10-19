@@ -56,11 +56,11 @@ void MainWindow::onActionExitTriggered()
 
 void MainWindow::onPushButtonStartServerClicked()
 {
-
+    controller->startServer(ui->lineEditPort->text().toUInt());
 }
 
 void MainWindow::onPushButtonStopServerClicked()
 {
-
+    controller->stopServer();
 }
 

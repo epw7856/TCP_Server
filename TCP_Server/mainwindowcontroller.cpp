@@ -29,42 +29,45 @@ MainWindowController::~MainWindowController()
 
 bool MainWindowController::isStartServerButtonEnabled() const
 {
-    return true;
+    return !(commsManager->isServerListening() || commsManager->isClientConnected());
 }
 
 bool MainWindowController::isStopServerButtonEnabled() const
 {
-    return true;
+    return (commsManager->isServerListening() || commsManager->isClientConnected());
 }
 
 bool MainWindowController::isPortLineEditEnabled() const
 {
-    return true;
+    return isStartServerButtonEnabled();
 }
 
 bool MainWindowController::isPeriodicityLineEditEnabled() const
 {
-    return true;
+    return isStartServerButtonEnabled();
 }
 
 void MainWindowController::startServer(unsigned port)
 {
-
+    emit requestStartServer();
 }
 
 void MainWindowController::stopServer()
 {
-
+    emit requestStopServer();
 }
 
 void MainWindowController::transmitOutboundData(std::string msg, bool isLittleEndian)
 {
+    if(commsManager->isClientConnected())
+    {
 
+    }
 }
 
 void MainWindowController::receivedStatusMessage(std::string msg)
 {
-
+    emit sendStatusBarMessage(msg);
 }
 
 void MainWindowController::receivedDataFromClient(std::vector<unsigned> data)
