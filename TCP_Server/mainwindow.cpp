@@ -15,8 +15,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->pushButtonStartServer, &QPushButton::clicked, this, &MainWindow::onPushButtonStartServerClicked);
     connect(ui->pushButtonStopServer, &QPushButton::clicked, this, &MainWindow::onPushButtonStopServerClicked);
 
-    //connect(controller.get(), &MainWindowController::updateUI, this, &MainWindow::periodicUpdate);
-    //connect(controller.get(), &MainWindowController::sendStatusBarMessage, this, &MainWindow::showStatusBarMessage);
+    connect(controller.get(), &MainWindowController::updateUI, this, &MainWindow::periodicUpdate);
+    connect(controller.get(), &MainWindowController::sendStatusBarMessage, this, &MainWindow::showStatusBarMessage);
 
     setupStatusBar();
     periodicUpdate();
