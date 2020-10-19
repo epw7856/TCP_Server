@@ -1,11 +1,13 @@
 #include "mainwindow.h"
+#include "mainwindowcontroller.h"
 #include <QLabel>
 #include "ui_mainwindow.h"
 
 MainWindow::MainWindow(QWidget *parent)
 :
     QMainWindow(parent),
-    ui(new Ui::MainWindow)
+    ui(new Ui::MainWindow),
+    controller(std::make_unique<MainWindowController>())
 {
     ui->setupUi(this);
 

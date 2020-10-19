@@ -4,6 +4,7 @@
 #include <memory>
 #include <QMainWindow>
 
+class MainWindowController;
 class QLabel;
 
 QT_BEGIN_NAMESPACE
@@ -29,6 +30,7 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
+    std::unique_ptr<MainWindowController> controller;
     std::unique_ptr<QLabel> statusBarLabel;
 
     void setupStatusBar();
