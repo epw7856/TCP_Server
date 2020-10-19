@@ -1,7 +1,10 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include <memory>
 #include <QMainWindow>
+
+class QLabel;
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -15,7 +18,19 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+public slots:
+    void showStatusBarMessage(QString msg);
+    void periodicUpdate();
+
+private slots:
+    void onActionExitTriggered();
+    void onPushButtonStartServerClicked();
+    void onPushButtonStopServerClicked();
+
 private:
     Ui::MainWindow *ui;
+    std::unique_ptr<QLabel> statusBarLabel;
+
+    void setupStatusBar();
 };
 #endif // MAINWINDOW_H
