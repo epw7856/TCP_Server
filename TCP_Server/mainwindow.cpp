@@ -19,6 +19,7 @@ MainWindow::MainWindow(QWidget *parent)
     //connect(controller.get(), &MainWindowController::sendStatusBarMessage, this, &MainWindow::showStatusBarMessage);
 
     setupStatusBar();
+    periodicUpdate();
 }
 
 MainWindow::~MainWindow()
@@ -37,10 +38,10 @@ void MainWindow::setupStatusBar()
     showStatusBarMessage("Ready");
 }
 
-void MainWindow::showStatusBarMessage(QString msg)
+void MainWindow::showStatusBarMessage(std::string msg)
 {
     statusBarLabel->clear();
-    statusBarLabel->setText("Status: " + msg + "  ");
+    statusBarLabel->setText("Status: " + QString::fromStdString(msg) + "  ");
 }
 
 void MainWindow::periodicUpdate()

@@ -20,7 +20,7 @@ public:
     ~MainWindow();
 
 public slots:
-    void showStatusBarMessage(QString msg);
+    void showStatusBarMessage(std::string msg);
     void periodicUpdate();
 
 private slots:
