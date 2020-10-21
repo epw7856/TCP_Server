@@ -24,12 +24,13 @@ public slots:
     void showStatusBarMessage(std::string msg);
     void periodicUpdate();
     void updateInboundData(std::string data);
-    void clientConnectionStatusChange(bool isConnected);
 
 private slots:
     void onActionExitTriggered();
     void onPushButtonStartServerClicked();
     void onPushButtonStopServerClicked();
+    void onPushButtonStartTransmissionClicked();
+    void onPushButtonStopTransmissionClicked();
     void transmitOutboundData();
     void requestUpdatePort();
     void requestUpdateTransmissionInterval();
@@ -40,8 +41,6 @@ private:
     std::unique_ptr<QLabel> statusBarLabel;
     QTimer transmissionTimer;
 
-    bool setPort();
-    bool setTransmissionTimer();
     void setupStatusBar();
 };
 #endif // MAINWINDOW_H

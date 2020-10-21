@@ -41,6 +41,16 @@ bool MainWindowController::isStopServerButtonEnabled() const
     return (commsManager->isServerListening() || commsManager->isClientConnected());
 }
 
+bool MainWindowController::isStartTransmissionButtonEnabled() const
+{
+    return (commsManager->isClientConnected() && !transmittingDataToClient);
+}
+
+bool MainWindowController::isStopTransmissionButtonEnabled() const
+{
+    return (commsManager->isClientConnected() && transmittingDataToClient);
+}
+
 bool MainWindowController::isPortLineEditEnabled() const
 {
     return isStartServerButtonEnabled();
@@ -48,30 +58,51 @@ bool MainWindowController::isPortLineEditEnabled() const
 
 bool MainWindowController::isPeriodicityLineEditEnabled() const
 {
-    return !commsManager->isClientConnected();
+    return !transmittingDataToClient;
+}
+
+bool MainWindowController::isOutboundDataTextEditEnabled() const
+{
+    return !transmittingDataToClient;
 }
 
 bool MainWindowController::areEndianRadioButtonsEnabled() const
 {
-    return !commsManager->isClientConnected();
+    return isStartServerButtonEnabled();
 }
 
-bool MainWindowController::verifyTransmissionInterval(std::string num) const
+bool MainWindowController::verifyTransmissionInterval(std::string interval) const
 {
     QDoubleValidator val(0.0001, 100000000.0000, 4);
 
-    QString interval = QString::fromStdString(num);
+    QString strInterval = QString::fromStdString(interval);
     int pos = 0;
-    return (val.validate(interval, pos) != QValidator::Invalid);
+    if(val.validate(strInterval, pos) != QValidator::Invalid)
+    {
+        return true;
+    }
+    else
+    {
+        showUserInputErrorMessage("Please enter a valid transmission interval.");
+        return false;
+    }
 }
 
-bool MainWindowController::verifyPort(std::string num) const
+bool MainWindowController::verifyPort(std::string port) const
 {
     QIntValidator val(1, 10000000);
 
-    QString interval = QString::fromStdString(num);
+    QString strPort = QString::fromStdString(port);
     int pos = 0;
-    return (val.validate(interval, pos) != QValidator::Invalid);
+    if(val.validate(strPort, pos) != QValidator::Invalid)
+    {
+        return true;
+    }
+    else
+    {
+        showUserInputErrorMessage("Please enter a valid port number.");
+        return false;
+    }
 }
 
 void MainWindowController::startServer(unsigned port, bool processBigEndian)
@@ -88,7 +119,7 @@ void MainWindowController::transmitOutboundData(std::string msg)
 {
     if(commsManager->isClientConnected())
     {
-
+        transmittingDataToClient = true;
     }
 }
 
@@ -101,6 +132,11 @@ void MainWindowController::showUserInputErrorMessage(std::string msg) const
     msgBox.setDefaultButton(QMessageBox::Ok);
     msgBox.setIcon(QMessageBox::Warning);
     msgBox.exec();
+}
+
+void MainWindowController::outboundTransmissionStopped()
+{
+    transmittingDataToClient = false;
 }
 
 void MainWindowController::receivedStatusMessage(std::string msg)

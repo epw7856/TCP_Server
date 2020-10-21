@@ -15,15 +15,18 @@ public:
     ~MainWindowController();
     bool isStartServerButtonEnabled() const;
     bool isStopServerButtonEnabled() const;
+    bool isStartTransmissionButtonEnabled() const;
+    bool isStopTransmissionButtonEnabled() const;
     bool isPortLineEditEnabled() const;
     bool isPeriodicityLineEditEnabled() const;
+    bool isOutboundDataTextEditEnabled() const;
     bool areEndianRadioButtonsEnabled() const;
-    bool verifyTransmissionInterval(std::string num) const;
-    bool verifyPort(std::string num) const;
+    bool verifyTransmissionInterval(std::string interval) const;
+    bool verifyPort(std::string port) const;
     void startServer(unsigned port, bool processBigEndian = false);
     void stopServer();
     void transmitOutboundData(std::string msg);
-    void showUserInputErrorMessage(std::string msg) const;
+    void outboundTransmissionStopped();
 
 public slots:
     void receivedStatusMessage(std::string msg);
@@ -44,7 +47,9 @@ signals:
 private:
     QThread serverThread;
     std::unique_ptr<CommunicationsManager> commsManager;
+    bool transmittingDataToClient = false;
 
+    void showUserInputErrorMessage(std::string msg) const;
 };
 
 #endif // MAINWINDOWCONTROLLER_H

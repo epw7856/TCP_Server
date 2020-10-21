@@ -14,12 +14,17 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->actionExit, &QAction::triggered, this, &MainWindow::onActionExitTriggered);
     connect(ui->pushButtonStartServer, &QPushButton::clicked, this, &MainWindow::onPushButtonStartServerClicked);
     connect(ui->pushButtonStopServer, &QPushButton::clicked, this, &MainWindow::onPushButtonStopServerClicked);
+    connect(ui->pushButtonStartTransmission, &QPushButton::clicked, this, &MainWindow::onPushButtonStartTransmissionClicked);
+    connect(ui->pushButtonStopTransmission, &QPushButton::clicked, this, &MainWindow::onPushButtonStopTransmissionClicked);
 
     connect(controller.get(), &MainWindowController::updateUI, this, &MainWindow::periodicUpdate);
     connect(controller.get(), &MainWindowController::sendInboundDataToUI, this, &MainWindow::updateInboundData);
     connect(controller.get(), &MainWindowController::sendStatusBarMessage, this, &MainWindow::showStatusBarMessage);
 
     connect(&transmissionTimer, &QTimer::timeout, this, &MainWindow::transmitOutboundData);
+
+    connect(ui->lineEditPort, &QLineEdit::returnPressed, this, &MainWindow::requestUpdatePort);
+    connect(ui->lineEditPeriodicity, &QLineEdit::returnPressed, this, &MainWindow::requestUpdateTransmissionInterval);
 
     setupStatusBar();
     periodicUpdate();
@@ -51,32 +56,19 @@ void MainWindow::periodicUpdate()
 {
     ui->pushButtonStartServer->setEnabled(controller->isStartServerButtonEnabled());
     ui->pushButtonStopServer->setEnabled(controller->isStopServerButtonEnabled());
+    ui->pushButtonStartTransmission->setEnabled(controller->isStartTransmissionButtonEnabled());
+    ui->pushButtonStopTransmission->setEnabled(controller->isStopTransmissionButtonEnabled());
     ui->lineEditPort->setEnabled(controller->isPortLineEditEnabled());
+    ui->lineEditPeriodicity->setEnabled(controller->isPeriodicityLineEditEnabled());
+    ui->radioButtonLittleEndian->setEnabled(controller->areEndianRadioButtonsEnabled());
+    ui->radioButtonBigEndian->setEnabled(controller->areEndianRadioButtonsEnabled());
+    ui->textEditOutboundData->setEnabled(controller->isOutboundDataTextEditEnabled());
 }
 
 void MainWindow::updateInboundData(std::string data)
 {
     ui->textEditInboundData->clear();
     ui->textEditInboundData->setText(QString::fromStdString(data));
-}
-
-void MainWindow::clientConnectionStatusChange(bool isConnected)
-{
-    ui->lineEditPeriodicity->setEnabled(!isConnected);
-    ui->radioButtonLittleEndian->setEnabled(!isConnected);
-    ui->radioButtonBigEndian->setEnabled(!isConnected);
-
-    if(isConnected)
-    {
-        if(setTransmissionTimer())
-        {
-            transmissionTimer.start();
-        }
-    }
-    else
-    {
-        transmissionTimer.stop();
-    }
 }
 
 void MainWindow::onActionExitTriggered()
@@ -86,7 +78,7 @@ void MainWindow::onActionExitTriggered()
 
 void MainWindow::onPushButtonStartServerClicked()
 {
-    if(setPort())
+    if(controller->verifyPort(ui->lineEditPort->text().toStdString()))
     {
         controller->startServer(ui->lineEditPort->text().toUInt(), ui->radioButtonBigEndian->isChecked());
     }
@@ -97,6 +89,26 @@ void MainWindow::onPushButtonStopServerClicked()
     controller->stopServer();
 }
 
+void MainWindow::onPushButtonStartTransmissionClicked()
+{
+    if(controller->verifyTransmissionInterval(ui->lineEditPeriodicity->text().toStdString()))
+    {
+        transmitOutboundData();
+        transmissionTimer.setInterval(ui->lineEditPeriodicity->text().toDouble());
+        transmissionTimer.start();
+    }
+
+    periodicUpdate();
+}
+
+void MainWindow::onPushButtonStopTransmissionClicked()
+{
+    transmissionTimer.stop();
+    controller->outboundTransmissionStopped();
+
+    periodicUpdate();
+}
+
 void MainWindow::transmitOutboundData()
 {
     controller->transmitOutboundData(ui->textEditOutboundData->toPlainText().toStdString());
@@ -104,38 +116,10 @@ void MainWindow::transmitOutboundData()
 
 void MainWindow::requestUpdatePort()
 {
-    setPort();
+    controller->verifyPort(ui->lineEditPort->text().toStdString());
 }
 
 void MainWindow::requestUpdateTransmissionInterval()
 {
-    setTransmissionTimer();
+    controller->verifyTransmissionInterval(ui->lineEditPeriodicity->text().toStdString());
 }
-
-bool MainWindow::setPort()
-{
-    if(controller->verifyPort(ui->lineEditPort->text().toStdString()))
-    {
-        return true;
-    }
-    else
-    {
-        controller->showUserInputErrorMessage("Please enter a valid port number.");
-        return false;
-    }
-}
-
-bool MainWindow::setTransmissionTimer()
-{
-    if(controller->verifyTransmissionInterval(ui->lineEditPeriodicity->text().toStdString()))
-    {
-        transmissionTimer.setInterval(ui->lineEditPeriodicity->text().toDouble());
-        return true;
-    }
-    else
-    {
-        controller->showUserInputErrorMessage("Please enter a valid transmission interval.");
-        return false;
-    }
-}
-
