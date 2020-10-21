@@ -18,12 +18,14 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     communicationsmanager.cpp \
+    commutilities.cpp \
     main.cpp \
     mainwindow.cpp \
     mainwindowcontroller.cpp
 
 HEADERS += \
     communicationsmanager.h \
+    commutilities.h \
     mainwindow.h \
     mainwindowcontroller.h
 
