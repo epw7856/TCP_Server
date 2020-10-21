@@ -17,17 +17,23 @@ public:
     bool isStopServerButtonEnabled() const;
     bool isPortLineEditEnabled() const;
     bool isPeriodicityLineEditEnabled() const;
+    bool areEndianRadioButtonsEnabled() const;
+    bool verifyTransmissionInterval(std::string num) const;
+    bool verifyPort(std::string num) const;
     void startServer(unsigned port, bool processBigEndian = false);
     void stopServer();
     void transmitOutboundData(std::string msg);
+    void showUserInputErrorMessage(std::string msg) const;
 
 public slots:
     void receivedStatusMessage(std::string msg);
-    void receivedErrorMessage(std::string msg);
+    void showServerErrorMessage(std::string msg);
     void receivedDataFromClient(std::vector<unsigned> data);
+    void receivedStatusChanged();
 
 signals:
     void updateUI();
+    void sendInboundDataToUI(std::string data);
     void updateInboundData(std::string msg);
     void sendStatusBarMessage(std::string msg);
 

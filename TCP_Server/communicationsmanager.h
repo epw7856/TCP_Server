@@ -30,9 +30,9 @@ private slots:
 
 signals:
     void receivedDataFromClient(std::vector<unsigned> data);
-    void serverStopped();
     void sendStatusMessage(std::string msg);
     void sendErrorMessage(std::string msg);
+    void statusChanged();
 
 private:
     std::unique_ptr<QTcpServer> server;

@@ -3,7 +3,7 @@
 std::vector<unsigned> toUint32Vector(const QByteArray& byteArray)
 {
     std::vector<unsigned> uint32Vector;
-    unsigned size = static_cast<unsigned>(byteArray.size()) / sizeof (unsigned);
+    unsigned size = static_cast<unsigned>(byteArray.size()) / sizeof(unsigned);
     uint32Vector.resize(size);
     QDataStream stream(byteArray);
     stream.setByteOrder(QDataStream::LittleEndian);
@@ -18,7 +18,7 @@ std::vector<unsigned> toUint32Vector(const QByteArray& byteArray)
 
 QByteArray toByteArray(const std::vector<unsigned>& uint32Vector)
 {
-    // Assumption: Little Endian input parameter
+    // Assumption: input vector is Little Endian
     return toByteArray(uint32Vector, QDataStream::LittleEndian);
 }
 

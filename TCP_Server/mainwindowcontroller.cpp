@@ -1,6 +1,7 @@
 #include "communicationsmanager.h"
 #include "mainwindowcontroller.h"
 #include <QMessageBox>
+#include <QValidator>
 
 Q_DECLARE_METATYPE(std::string);
 
@@ -15,7 +16,8 @@ MainWindowController::MainWindowController()
     connect(this, &MainWindowController::requestStartServer, commsManager.get(), &CommunicationsManager::startServer);
     connect(this, &MainWindowController::requestStopServer, commsManager.get(), &CommunicationsManager::stopServer);
     connect(commsManager.get(), &CommunicationsManager::sendStatusMessage, this, &MainWindowController::receivedStatusMessage);
-    connect(commsManager.get(), &CommunicationsManager::sendErrorMessage, this, &MainWindowController::receivedErrorMessage);
+    connect(commsManager.get(), &CommunicationsManager::sendErrorMessage, this, &MainWindowController::showServerErrorMessage);
+    connect(commsManager.get(), &CommunicationsManager::statusChanged, this, &MainWindowController::receivedStatusChanged);
     connect(this, &MainWindowController::transmitData, commsManager.get(), &CommunicationsManager::sendDataToClient);
     connect(commsManager.get(), &CommunicationsManager::receivedDataFromClient, this, &MainWindowController::receivedDataFromClient);
 
@@ -46,7 +48,30 @@ bool MainWindowController::isPortLineEditEnabled() const
 
 bool MainWindowController::isPeriodicityLineEditEnabled() const
 {
-    return isStartServerButtonEnabled();
+    return !commsManager->isClientConnected();
+}
+
+bool MainWindowController::areEndianRadioButtonsEnabled() const
+{
+    return !commsManager->isClientConnected();
+}
+
+bool MainWindowController::verifyTransmissionInterval(std::string num) const
+{
+    QDoubleValidator val(0.0001, 100000000.0000, 4);
+
+    QString interval = QString::fromStdString(num);
+    int pos = 0;
+    return (val.validate(interval, pos) != QValidator::Invalid);
+}
+
+bool MainWindowController::verifyPort(std::string num) const
+{
+    QIntValidator val(1, 10000000);
+
+    QString interval = QString::fromStdString(num);
+    int pos = 0;
+    return (val.validate(interval, pos) != QValidator::Invalid);
 }
 
 void MainWindowController::startServer(unsigned port, bool processBigEndian)
@@ -67,16 +92,27 @@ void MainWindowController::transmitOutboundData(std::string msg)
     }
 }
 
+void MainWindowController::showUserInputErrorMessage(std::string msg) const
+{
+    QMessageBox msgBox;
+    msgBox.setWindowTitle("Input Error");
+    msgBox.setText(QString::fromStdString(msg));
+    msgBox.setStandardButtons(QMessageBox::Ok);
+    msgBox.setDefaultButton(QMessageBox::Ok);
+    msgBox.setIcon(QMessageBox::Warning);
+    msgBox.exec();
+}
+
 void MainWindowController::receivedStatusMessage(std::string msg)
 {
     emit sendStatusBarMessage(msg);
 }
 
-void MainWindowController::receivedErrorMessage(std::string msg)
+void MainWindowController::showServerErrorMessage(std::string msg)
 {
     QMessageBox msgBox;
-    msgBox.setText(QString::fromStdString(msg));
     msgBox.setWindowTitle("Server Error");
+    msgBox.setText(QString::fromStdString(msg));
     msgBox.setStandardButtons(QMessageBox::Ok);
     msgBox.setDefaultButton(QMessageBox::Ok);
     msgBox.setIcon(QMessageBox::Critical);
@@ -86,4 +122,9 @@ void MainWindowController::receivedErrorMessage(std::string msg)
 void MainWindowController::receivedDataFromClient(std::vector<unsigned> data)
 {
 
+}
+
+void MainWindowController::receivedStatusChanged()
+{
+    emit updateUI();
 }

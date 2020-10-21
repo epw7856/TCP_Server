@@ -41,6 +41,8 @@ void CommunicationsManager::startServer(unsigned port, bool bigEndian)
         msg = "Unable to start server on port " + QString::number(socketPort) + "!";
         emit sendErrorMessage(msg.toStdString());
     }
+
+    emit statusChanged();
 }
 
 void CommunicationsManager::stopServer()
@@ -58,7 +60,7 @@ void CommunicationsManager::stopServer()
 
     QString msg = "Server stopped.";
     emit sendStatusMessage(msg.toStdString());
-    emit serverStopped();
+    emit statusChanged();
 }
 
 void CommunicationsManager::sendDataToClient(std::vector<unsigned> data)
@@ -97,6 +99,8 @@ void CommunicationsManager::incomingSocketConnection()
 
     server->close();
     serverListening = false;
+
+    emit statusChanged();
 }
 
 void CommunicationsManager::readIncomingData()
@@ -109,6 +113,8 @@ void CommunicationsManager::disconnectedFromSocket()
     socket->reset();
     clientConnected = false;
     startServer(socketPort, processBigEndianData);
+
+    emit statusChanged();
 }
 
 QByteArray CommunicationsManager::serializeOutboundData(std::vector<unsigned>& outData)
@@ -127,7 +133,7 @@ std::vector<unsigned> CommunicationsManager::deserializeInboundData(QByteArray i
     ds.skipRawData(0);
     std::vector<unsigned> data;
     unsigned temp;
-    unsigned size = inData.size() / 4U;
+    unsigned size = inData.size() / sizeof(unsigned);
 
     for(unsigned i = 0; i < size; ++i)
     {
