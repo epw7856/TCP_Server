@@ -1,5 +1,6 @@
 #include "communicationsmanager.h"
 #include "mainwindowcontroller.h"
+#include <QMessageBox>
 
 Q_DECLARE_METATYPE(std::string);
 
@@ -14,6 +15,7 @@ MainWindowController::MainWindowController()
     connect(this, &MainWindowController::requestStartServer, commsManager.get(), &CommunicationsManager::startServer);
     connect(this, &MainWindowController::requestStopServer, commsManager.get(), &CommunicationsManager::stopServer);
     connect(commsManager.get(), &CommunicationsManager::sendStatusMessage, this, &MainWindowController::receivedStatusMessage);
+    connect(commsManager.get(), &CommunicationsManager::sendErrorMessage, this, &MainWindowController::receivedErrorMessage);
     connect(this, &MainWindowController::transmitData, commsManager.get(), &CommunicationsManager::sendDataToClient);
     connect(commsManager.get(), &CommunicationsManager::receivedDataFromClient, this, &MainWindowController::receivedDataFromClient);
 
@@ -47,9 +49,9 @@ bool MainWindowController::isPeriodicityLineEditEnabled() const
     return isStartServerButtonEnabled();
 }
 
-void MainWindowController::startServer(unsigned port)
+void MainWindowController::startServer(unsigned port, bool processBigEndian)
 {
-    emit requestStartServer();
+    emit requestStartServer(port, processBigEndian);
 }
 
 void MainWindowController::stopServer()
@@ -57,7 +59,7 @@ void MainWindowController::stopServer()
     emit requestStopServer();
 }
 
-void MainWindowController::transmitOutboundData(std::string msg, bool isLittleEndian)
+void MainWindowController::transmitOutboundData(std::string msg)
 {
     if(commsManager->isClientConnected())
     {
@@ -68,6 +70,17 @@ void MainWindowController::transmitOutboundData(std::string msg, bool isLittleEn
 void MainWindowController::receivedStatusMessage(std::string msg)
 {
     emit sendStatusBarMessage(msg);
+}
+
+void MainWindowController::receivedErrorMessage(std::string msg)
+{
+    QMessageBox msgBox;
+    msgBox.setText(QString::fromStdString(msg));
+    msgBox.setWindowTitle("Server Error");
+    msgBox.setStandardButtons(QMessageBox::Ok);
+    msgBox.setDefaultButton(QMessageBox::Ok);
+    msgBox.setIcon(QMessageBox::Critical);
+    msgBox.exec();
 }
 
 void MainWindowController::receivedDataFromClient(std::vector<unsigned> data)

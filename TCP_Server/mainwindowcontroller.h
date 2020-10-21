@@ -17,12 +17,13 @@ public:
     bool isStopServerButtonEnabled() const;
     bool isPortLineEditEnabled() const;
     bool isPeriodicityLineEditEnabled() const;
-    void startServer(unsigned port);
+    void startServer(unsigned port, bool processBigEndian = false);
     void stopServer();
-    void transmitOutboundData(std::string msg, bool isLittleEndian = true);
+    void transmitOutboundData(std::string msg);
 
 public slots:
     void receivedStatusMessage(std::string msg);
+    void receivedErrorMessage(std::string msg);
     void receivedDataFromClient(std::vector<unsigned> data);
 
 signals:
@@ -30,7 +31,7 @@ signals:
     void updateInboundData(std::string msg);
     void sendStatusBarMessage(std::string msg);
 
-    void requestStartServer();
+    void requestStartServer(unsigned port, bool processBigEndian);
     void requestStopServer();
     void transmitData(std::vector<unsigned> data);
 

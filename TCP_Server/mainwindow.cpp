@@ -56,7 +56,7 @@ void MainWindow::onActionExitTriggered()
 
 void MainWindow::onPushButtonStartServerClicked()
 {
-    controller->startServer(ui->lineEditPort->text().toUInt());
+    controller->startServer(ui->lineEditPort->text().toUInt(), ui->radioButtonBigEndian->isChecked());
 }
 
 void MainWindow::onPushButtonStopServerClicked()
