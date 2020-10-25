@@ -4,10 +4,8 @@
 #include <QTcpSocket>
 
 CommunicationsManager::CommunicationsManager()
-:
-    server(std::make_unique<QTcpServer>())
 {
-    connect(server.get(), &QTcpServer::newConnection, this, &CommunicationsManager::incomingSocketConnection);
+
 }
 
 CommunicationsManager::~CommunicationsManager() = default;
@@ -28,6 +26,12 @@ void CommunicationsManager::startServer(unsigned port, bool bigEndian)
 {
     processBigEndianData = bigEndian;
     socketPort = port;
+
+    if(server == nullptr)
+    {
+        server = std::make_unique<QTcpServer>();
+        connect(server.get(), &QTcpServer::newConnection, this, &CommunicationsManager::incomingSocketConnection);
+    }
 
     QString msg = "";
     if(server->listen(QHostAddress::LocalHost, socketPort))
