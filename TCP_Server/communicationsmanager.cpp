@@ -3,10 +3,7 @@
 #include <QTcpServer>
 #include <QTcpSocket>
 
-CommunicationsManager::CommunicationsManager()
-{
-
-}
+CommunicationsManager::CommunicationsManager() = default;
 
 CommunicationsManager::~CommunicationsManager() = default;
 
@@ -24,6 +21,8 @@ bool CommunicationsManager::isClientConnected()
 
 void CommunicationsManager::startServer(unsigned port, bool bigEndian)
 {
+    QWriteLocker locker(&lock);
+
     processBigEndianData = bigEndian;
     socketPort = port;
 
@@ -51,6 +50,8 @@ void CommunicationsManager::startServer(unsigned port, bool bigEndian)
 
 void CommunicationsManager::stopServer()
 {
+    QWriteLocker locker(&lock);
+
     if(clientConnected)
     {
         socket->close();
@@ -69,6 +70,8 @@ void CommunicationsManager::stopServer()
 
 void CommunicationsManager::sendDataToClient(std::vector<unsigned> data)
 {
+    QReadLocker locker(&lock);
+
     if(clientConnected && (data.size() > 0))
     {
         socket->write(serializeOutboundData(data));
@@ -78,6 +81,8 @@ void CommunicationsManager::sendDataToClient(std::vector<unsigned> data)
 
 void CommunicationsManager::incomingSocketConnection()
 {
+    QWriteLocker locker(&lock);
+
     if(socket != nullptr)
     {
         socket->reset();
@@ -114,6 +119,8 @@ void CommunicationsManager::readIncomingData()
 
 void CommunicationsManager::disconnectedFromSocket()
 {
+    QWriteLocker locker(&lock);
+
     socket->reset();
     clientConnected = false;
     startServer(socketPort, processBigEndianData);
