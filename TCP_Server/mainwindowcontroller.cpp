@@ -2,12 +2,14 @@
 #include "mainwindowcontroller.h"
 #include <QMessageBox>
 #include <QValidator>
+#include "systemdatasource.h"
 
 Q_DECLARE_METATYPE(std::string);
 
 MainWindowController::MainWindowController()
 :
-    commsManager(std::make_unique<CommunicationsManager>())
+    commsManager(std::make_unique<CommunicationsManager>()),
+    sds(std::make_unique<SystemDataSource>())
 {
     qRegisterMetaType<std::string>();
 
@@ -120,6 +122,17 @@ void MainWindowController::transmitOutboundData(std::string msg)
     if(commsManager->isClientConnected())
     {
         transmittingDataToClient = true;
+
+        if(verifyOutboundData(msg))
+        {
+            // Transmit to commsManager
+            outboundDataError = false;
+        }
+        else if(!outboundDataError)
+        {
+            // Show error msg if error msg
+            outboundDataError = true;
+        }
     }
 }
 
@@ -134,9 +147,21 @@ void MainWindowController::showUserInputErrorMessage(std::string msg) const
     msgBox.exec();
 }
 
+bool MainWindowController::verifyOutboundData(std::string& msg)
+{
+     QStringList dataList = QString::fromStdString(msg).split("\n");
+     outboundData.clear();
+
+     for(auto item : dataList)
+     {
+
+     }
+}
+
 void MainWindowController::outboundTransmissionStopped()
 {
     transmittingDataToClient = false;
+    outboundDataError = false;
 }
 
 void MainWindowController::receivedStatusMessage(std::string msg)

@@ -5,6 +5,7 @@
 #include <QThread>
 
 class CommunicationsManager;
+class SystemDataSource;
 
 class MainWindowController : public QObject
 {
@@ -47,9 +48,13 @@ signals:
 private:
     QThread serverThread;
     std::unique_ptr<CommunicationsManager> commsManager;
+    std::unique_ptr<SystemDataSource> sds;
     bool transmittingDataToClient = false;
+    bool outboundDataError = false;
+    std::vector<unsigned> outboundData = {};
 
     void showUserInputErrorMessage(std::string msg) const;
+    bool verifyOutboundData(std::string& msg);
 };
 
 #endif // MAINWINDOWCONTROLLER_H

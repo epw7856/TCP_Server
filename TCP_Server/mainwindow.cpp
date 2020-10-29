@@ -56,13 +56,16 @@ void MainWindow::periodicUpdate()
 {
     ui->pushButtonStartServer->setEnabled(controller->isStartServerButtonEnabled());
     ui->pushButtonStopServer->setEnabled(controller->isStopServerButtonEnabled());
-    ui->pushButtonStartTransmission->setEnabled(controller->isStartTransmissionButtonEnabled());
+    //ui->pushButtonStartTransmission->setEnabled(controller->isStartTransmissionButtonEnabled());
     ui->pushButtonStopTransmission->setEnabled(controller->isStopTransmissionButtonEnabled());
     ui->lineEditPort->setEnabled(controller->isPortLineEditEnabled());
     ui->lineEditPeriodicity->setEnabled(controller->isPeriodicityLineEditEnabled());
     ui->radioButtonLittleEndian->setEnabled(controller->areEndianRadioButtonsEnabled());
     ui->radioButtonBigEndian->setEnabled(controller->areEndianRadioButtonsEnabled());
-    ui->textEditOutboundData->setEnabled(controller->isOutboundDataTextEditEnabled());
+    //ui->textEditOutboundData->setEnabled(controller->isOutboundDataTextEditEnabled());
+
+    ui->pushButtonStartTransmission->setEnabled(true);
+    ui->textEditOutboundData->setEnabled(true);
 }
 
 void MainWindow::updateInboundData(std::string data)
@@ -91,14 +94,15 @@ void MainWindow::onPushButtonStopServerClicked()
 
 void MainWindow::onPushButtonStartTransmissionClicked()
 {
-    if(controller->verifyTransmissionInterval(ui->lineEditPeriodicity->text().toStdString()))
-    {
-        transmitOutboundData();
-        transmissionTimer.setInterval(ui->lineEditPeriodicity->text().toDouble());
-        transmissionTimer.start();
-    }
+//    if(controller->verifyTransmissionInterval(ui->lineEditPeriodicity->text().toStdString()))
+//    {
+//        transmitOutboundData();
+//        transmissionTimer.setInterval(ui->lineEditPeriodicity->text().toDouble());
+//        transmissionTimer.start();
+//    }
 
-    periodicUpdate();
+//    periodicUpdate();
+    transmitOutboundData();
 }
 
 void MainWindow::onPushButtonStopTransmissionClicked()

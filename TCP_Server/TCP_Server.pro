@@ -22,14 +22,17 @@ SOURCES += \
     datautilities.cpp \
     main.cpp \
     mainwindow.cpp \
-    mainwindowcontroller.cpp
+    mainwindowcontroller.cpp \
+    systemdatasource.cpp
 
 HEADERS += \
     communicationsmanager.h \
     commutilities.h \
+    datatype.h \
     datautilities.h \
     mainwindow.h \
-    mainwindowcontroller.h
+    mainwindowcontroller.h \
+    systemdatasource.h
 
 FORMS += \
     mainwindow.ui
