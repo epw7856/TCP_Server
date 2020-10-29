@@ -42,7 +42,7 @@ void CommunicationsManager::startServer(unsigned port, bool bigEndian)
     else
     {
         msg = "Unable to start server on port " + QString::number(socketPort) + "!";
-        emit sendErrorMessage(msg.toStdString());
+        emit sendErrorMessage("Server Error", msg.toStdString());
     }
 
     emit statusChanged();
@@ -103,7 +103,7 @@ void CommunicationsManager::incomingSocketConnection()
     else
     {
         msg = "Error encountered when connecting to client!";
-        emit sendErrorMessage(msg.toStdString());
+        emit sendErrorMessage("Server Error", msg.toStdString());
     }
 
     server->close();

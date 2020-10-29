@@ -1,3 +1,5 @@
+#include "datautilities.h"
+#include <QIntValidator>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QStandardPaths>
@@ -10,6 +12,64 @@ SystemDataSource::SystemDataSource()
 
     (!dir.exists() || !configFile.exists()) ? createConfigFile() :
                                               loadConfigFile();
+}
+
+bool SystemDataSource::convertOutboundData(std::vector<unsigned>& outboundData, std::string rawData)
+{
+    QStringList dataList = QString::fromStdString(rawData).split("\n");
+
+    for(int i = 0; i < dataList.size(); ++i)
+    {
+        unsigned value = 0U;
+        DataType type = outboundDataTypes[i];
+        switch (type)
+        {
+            case DataType::Unsigned:
+                {
+                    if(validateInt(dataList[i], true))
+                    {
+                        value = dataList[i].toUInt();
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+                break;
+
+            case DataType::Float:
+                {
+                    if(validateFloat(dataList[i]))
+                    {
+                        value = floatToUnsigned(dataList[i].toFloat());
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+                break;
+
+            case DataType::Int:
+                {
+                    if(validateInt(dataList[i], false))
+                    {
+                        value = intToUnsigned(dataList[i].toInt());
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+                break;
+
+            case DataType::Unknown:
+                return false;
+        }
+
+        outboundData.push_back(value);
+    }
+    return true;
 }
 
 bool SystemDataSource::setConfigurationDirectory()
@@ -27,7 +87,8 @@ void SystemDataSource::createConfigFile()
 
     if(!configFile.open(QIODevice::WriteOnly))
     {
-        emit sendErrorMessage("Unable to create new System Configuration File!");
+        emit sendErrorMessage("System Configuration Error", "Unable to create new System Configuration File!");
+        return;
     }
     configFile.close();
 
@@ -35,13 +96,16 @@ void SystemDataSource::createConfigFile()
 
     obj.insert("DataToClient", empty);
     obj.insert("DataFromClient", empty);
+
+    dataTypesValid = false;
 }
 
 void SystemDataSource::loadConfigFile()
 {
     if(!configFile.open((QIODevice::ReadOnly | QIODevice::Text)))
     {
-        emit sendErrorMessage("Unable to load System Configuration File!");
+        emit sendErrorMessage("System Configuration Error", "Unable to load System Configuration File!");
+        return;
     }
 
     QByteArray rawData = configFile.readAll();
@@ -51,7 +115,12 @@ void SystemDataSource::loadConfigFile()
 
     if(!parseDataTypes(JsonDataSection::DataToClient) || !parseDataTypes(JsonDataSection::DataFromClient))
     {
-        emit sendErrorMessage("Unknown data type found in System Configuration!");
+        dataTypesValid = false;
+        emit sendErrorMessage("System Configuration Error", "Unknown data type found in System Configuration!");
+    }
+    else
+    {
+        dataTypesValid = true;
     }
 }
 
@@ -110,4 +179,22 @@ DataType SystemDataSource::stringToDataType(const QString& value) const
     {
         return DataType::Unknown;
     }
+}
+
+bool SystemDataSource::validateUnsigned(QString& value) const
+{
+    unsigned uValue = value.toUInt();
+    return (uValue >= 0 && uValue <= 4294967295);
+}
+
+bool SystemDataSource::validateFloat(QString& value) const
+{
+
+}
+
+bool SystemDataSource::validateInt(QString& value) const
+{
+    QIntValidator val(-2147483648, 2147483647);
+    int pos = 0;
+    return (val.validate(value, pos) != QValidator::Invalid);
 }

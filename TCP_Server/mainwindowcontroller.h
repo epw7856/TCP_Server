@@ -22,8 +22,8 @@ public:
     bool isPeriodicityLineEditEnabled() const;
     bool isOutboundDataTextEditEnabled() const;
     bool areEndianRadioButtonsEnabled() const;
-    bool verifyTransmissionInterval(std::string interval) const;
-    bool verifyPort(std::string port) const;
+    bool verifyTransmissionInterval(std::string interval);
+    bool verifyPort(std::string port);
     void startServer(unsigned port, bool processBigEndian = false);
     void stopServer();
     void transmitOutboundData(std::string msg);
@@ -31,7 +31,7 @@ public:
 
 public slots:
     void receivedStatusMessage(std::string msg);
-    void showServerErrorMessage(std::string msg);
+    void showErrorMessage(std::string title, std::string msg);
     void receivedDataFromClient(std::vector<unsigned> data);
     void receivedStatusChanged();
 
@@ -53,8 +53,7 @@ private:
     bool outboundDataError = false;
     std::vector<unsigned> outboundData = {};
 
-    void showUserInputErrorMessage(std::string msg) const;
-    bool verifyOutboundData(std::string& msg);
+    bool verifyOutboundData(std::string& outData);
 };
 
 #endif // MAINWINDOWCONTROLLER_H

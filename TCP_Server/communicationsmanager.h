@@ -31,7 +31,7 @@ private slots:
 signals:
     void receivedDataFromClient(std::vector<unsigned> data);
     void sendStatusMessage(std::string msg);
-    void sendErrorMessage(std::string msg);
+    void sendErrorMessage(std::string title, std::string msg);
     void statusChanged();
 
 private:

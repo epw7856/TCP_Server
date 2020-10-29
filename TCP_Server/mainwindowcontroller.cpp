@@ -18,10 +18,12 @@ MainWindowController::MainWindowController()
     connect(this, &MainWindowController::requestStartServer, commsManager.get(), &CommunicationsManager::startServer);
     connect(this, &MainWindowController::requestStopServer, commsManager.get(), &CommunicationsManager::stopServer);
     connect(commsManager.get(), &CommunicationsManager::sendStatusMessage, this, &MainWindowController::receivedStatusMessage);
-    connect(commsManager.get(), &CommunicationsManager::sendErrorMessage, this, &MainWindowController::showServerErrorMessage);
+    connect(commsManager.get(), &CommunicationsManager::sendErrorMessage, this, &MainWindowController::showErrorMessage);
     connect(commsManager.get(), &CommunicationsManager::statusChanged, this, &MainWindowController::receivedStatusChanged);
     connect(this, &MainWindowController::transmitData, commsManager.get(), &CommunicationsManager::sendDataToClient);
     connect(commsManager.get(), &CommunicationsManager::receivedDataFromClient, this, &MainWindowController::receivedDataFromClient);
+
+    connect(sds.get(), &SystemDataSource::sendErrorMessage, this, &MainWindowController::showErrorMessage);
 
     serverThread.start();
 }
@@ -45,12 +47,12 @@ bool MainWindowController::isStopServerButtonEnabled() const
 
 bool MainWindowController::isStartTransmissionButtonEnabled() const
 {
-    return (commsManager->isClientConnected() && !transmittingDataToClient);
+    return (commsManager->isClientConnected() && sds->areDataTypesValid() && !transmittingDataToClient);
 }
 
 bool MainWindowController::isStopTransmissionButtonEnabled() const
 {
-    return (commsManager->isClientConnected() && transmittingDataToClient);
+    return (commsManager->isClientConnected() && sds->areDataTypesValid() && transmittingDataToClient);
 }
 
 bool MainWindowController::isPortLineEditEnabled() const
@@ -73,7 +75,7 @@ bool MainWindowController::areEndianRadioButtonsEnabled() const
     return isStartServerButtonEnabled();
 }
 
-bool MainWindowController::verifyTransmissionInterval(std::string interval) const
+bool MainWindowController::verifyTransmissionInterval(std::string interval)
 {
     QDoubleValidator val(0.0001, 100000000.0000, 4);
 
@@ -85,12 +87,12 @@ bool MainWindowController::verifyTransmissionInterval(std::string interval) cons
     }
     else
     {
-        showUserInputErrorMessage("Please enter a valid transmission interval.");
+        showErrorMessage("Input Error", "Please enter a valid transmission interval.");
         return false;
     }
 }
 
-bool MainWindowController::verifyPort(std::string port) const
+bool MainWindowController::verifyPort(std::string port)
 {
     QIntValidator val(1, 10000000);
 
@@ -102,7 +104,7 @@ bool MainWindowController::verifyPort(std::string port) const
     }
     else
     {
-        showUserInputErrorMessage("Please enter a valid port number.");
+        showErrorMessage("Input Error", "Please enter a valid port number.");
         return false;
     }
 }
@@ -125,37 +127,21 @@ void MainWindowController::transmitOutboundData(std::string msg)
 
         if(verifyOutboundData(msg))
         {
-            // Transmit to commsManager
+            emit transmitData(outboundData);
             outboundDataError = false;
         }
         else if(!outboundDataError)
         {
-            // Show error msg if error msg
+            showErrorMessage("Transmission Error", "Invalid outbound data detected!");
             outboundDataError = true;
         }
     }
 }
 
-void MainWindowController::showUserInputErrorMessage(std::string msg) const
+bool MainWindowController::verifyOutboundData(std::string& outData)
 {
-    QMessageBox msgBox;
-    msgBox.setWindowTitle("Input Error");
-    msgBox.setText(QString::fromStdString(msg));
-    msgBox.setStandardButtons(QMessageBox::Ok);
-    msgBox.setDefaultButton(QMessageBox::Ok);
-    msgBox.setIcon(QMessageBox::Warning);
-    msgBox.exec();
-}
-
-bool MainWindowController::verifyOutboundData(std::string& msg)
-{
-     QStringList dataList = QString::fromStdString(msg).split("\n");
-     outboundData.clear();
-
-     for(auto item : dataList)
-     {
-
-     }
+    outboundData.clear();
+    return sds->convertOutboundData(outboundData, outData);
 }
 
 void MainWindowController::outboundTransmissionStopped()
@@ -169,10 +155,10 @@ void MainWindowController::receivedStatusMessage(std::string msg)
     emit sendStatusBarMessage(msg);
 }
 
-void MainWindowController::showServerErrorMessage(std::string msg)
+void MainWindowController::showErrorMessage(std::string title, std::string msg)
 {
     QMessageBox msgBox;
-    msgBox.setWindowTitle("Server Error");
+    msgBox.setWindowTitle(QString::fromStdString(title));
     msgBox.setText(QString::fromStdString(msg));
     msgBox.setStandardButtons(QMessageBox::Ok);
     msgBox.setDefaultButton(QMessageBox::Ok);
