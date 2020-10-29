@@ -183,13 +183,17 @@ DataType SystemDataSource::stringToDataType(const QString& value) const
 
 bool SystemDataSource::validateUnsigned(QString& value) const
 {
-    unsigned uValue = value.toUInt();
-    return (uValue >= 0 && uValue <= 4294967295);
+    bool status;
+    value.toUInt(&status, 10);
+    return status;
 }
 
 bool SystemDataSource::validateFloat(QString& value) const
 {
+    QDoubleValidator val(0.000000001, 100000000.0000, 9);
 
+    int pos = 0;
+    return (val.validate(value, pos) != QValidator::Invalid);
 }
 
 bool SystemDataSource::validateInt(QString& value) const

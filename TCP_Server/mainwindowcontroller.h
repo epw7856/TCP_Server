@@ -26,7 +26,7 @@ public:
     bool verifyPort(std::string port);
     void startServer(unsigned port, bool processBigEndian = false);
     void stopServer();
-    void transmitOutboundData(std::string msg);
+    void transmitOutboundData(std::string outData);
     void outboundTransmissionStopped();
 
 public slots:

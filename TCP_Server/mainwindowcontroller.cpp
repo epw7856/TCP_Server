@@ -119,13 +119,13 @@ void MainWindowController::stopServer()
     emit requestStopServer();
 }
 
-void MainWindowController::transmitOutboundData(std::string msg)
+void MainWindowController::transmitOutboundData(std::string outData)
 {
     if(commsManager->isClientConnected())
     {
         transmittingDataToClient = true;
 
-        if(verifyOutboundData(msg))
+        if(verifyOutboundData(outData))
         {
             emit transmitData(outboundData);
             outboundDataError = false;
