@@ -19,6 +19,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
     communicationsmanager.cpp \
     commutilities.cpp \
+    datautilities.cpp \
     main.cpp \
     mainwindow.cpp \
     mainwindowcontroller.cpp
@@ -26,6 +27,7 @@ SOURCES += \
 HEADERS += \
     communicationsmanager.h \
     commutilities.h \
+    datautilities.h \
     mainwindow.h \
     mainwindowcontroller.h
 
