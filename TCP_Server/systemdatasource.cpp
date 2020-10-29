@@ -26,7 +26,7 @@ bool SystemDataSource::convertOutboundData(std::vector<unsigned>& outboundData, 
         {
             case DataType::Unsigned:
                 {
-                    if(validateInt(dataList[i], true))
+                    if(validateInt(dataList[i]))
                     {
                         value = dataList[i].toUInt();
                     }
@@ -52,7 +52,7 @@ bool SystemDataSource::convertOutboundData(std::vector<unsigned>& outboundData, 
 
             case DataType::Int:
                 {
-                    if(validateInt(dataList[i], false))
+                    if(validateInt(dataList[i]))
                     {
                         value = intToUnsigned(dataList[i].toInt());
                     }
