@@ -51,6 +51,7 @@ private:
     std::unique_ptr<SystemDataSource> sds;
     bool transmittingDataToClient = false;
     bool outboundDataError = false;
+    bool inboundDataError = false;
     std::vector<unsigned> outboundData = {};
 
     bool verifyOutboundData(std::string& outData);

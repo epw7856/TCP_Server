@@ -168,7 +168,17 @@ void MainWindowController::showErrorMessage(std::string title, std::string msg)
 
 void MainWindowController::receivedDataFromClient(std::vector<unsigned> data)
 {
-
+    std::string dataToUI;
+    if(sds->convertInboundData(data, dataToUI))
+    {
+        emit updateInboundData(dataToUI);
+        inboundDataError = false;
+    }
+    else if(!inboundDataError)
+    {
+        showErrorMessage("Transmission Error", "Invalid inbound data detected!");
+        inboundDataError = true;
+    }
 }
 
 void MainWindowController::receivedStatusChanged()

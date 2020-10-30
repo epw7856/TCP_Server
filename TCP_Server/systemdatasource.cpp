@@ -18,8 +18,13 @@ bool SystemDataSource::convertOutboundData(std::vector<unsigned>& outboundData, 
 {
     QStringList dataList = QString::fromStdString(rawData).split("\n");
 
-    for(int i = 0; i < dataList.size(); ++i)
+    for(unsigned i = 0; i < static_cast<unsigned>(dataList.size()); ++i)
     {
+        if(i >= outboundDataTypes.size())
+        {
+            return false;
+        }
+
         unsigned value = 0U;
         DataType type = outboundDataTypes[i];
         switch (type)
@@ -68,6 +73,51 @@ bool SystemDataSource::convertOutboundData(std::vector<unsigned>& outboundData, 
         }
 
         outboundData.push_back(value);
+    }
+    return true;
+}
+
+bool SystemDataSource::convertInboundData(std::vector<unsigned>& inboundData, std::string& rawData)
+{
+    QString dataSet = "";
+    for(unsigned i = 0; i < inboundData.size(); ++i)
+    {
+        if(i >= inboundDataTypes.size())
+        {
+            return false;
+        }
+
+        DataType type = inboundDataTypes[i];
+        switch (type)
+        {
+            case DataType::Unsigned:
+                {
+                    dataSet += QString::number(inboundData[i]);
+                }
+                break;
+
+            case DataType::Float:
+                {
+                    dataSet += QString::number(unsignedToFloat(inboundData[i]));
+                }
+                break;
+
+            case DataType::Int:
+                {
+                    dataSet += QString::number(unsignedToInt(inboundData[i]));
+                }
+                break;
+
+            case DataType::Unknown:
+                return false;
+        }
+
+        if(i < inboundData.size() - 1)
+        {
+            dataSet += "/n";
+        }
+
+        rawData = dataSet.toStdString();
     }
     return true;
 }
@@ -191,7 +241,6 @@ bool SystemDataSource::validateUnsigned(QString& value) const
 bool SystemDataSource::validateFloat(QString& value) const
 {
     QDoubleValidator val(0.000000001, 100000000.0000, 9);
-
     int pos = 0;
     return (val.validate(value, pos) != QValidator::Invalid);
 }

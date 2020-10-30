@@ -13,6 +13,7 @@ public:
     SystemDataSource();
     bool areDataTypesValid() const;
     bool convertOutboundData(std::vector<unsigned>& outboundData, std::string rawData);
+    bool convertInboundData(std::vector<unsigned>& inboundData, std::string& rawData);
 
 signals:
     void sendErrorMessage(std::string title, std::string msg);
