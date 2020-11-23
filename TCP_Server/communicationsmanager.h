@@ -3,7 +3,6 @@
 
 #include <memory>
 #include <QReadWriteLock>
-#include <QObject>
 #include <QTcpServer>
 
 class QTcpSocket;
