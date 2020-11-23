@@ -46,6 +46,17 @@ void MainWindow::setupStatusBar()
     showStatusBarMessage("Ready");
 }
 
+void MainWindow::stopTransmissions()
+{
+    if(transmissionTimer.isActive())
+    {
+        transmissionTimer.stop();
+    }
+    controller->outboundTransmissionStopped();
+
+    periodicUpdate();
+}
+
 void MainWindow::showStatusBarMessage(std::string msg)
 {
     statusBarLabel->clear();
@@ -86,6 +97,7 @@ void MainWindow::onPushButtonStartServerClicked()
 
 void MainWindow::onPushButtonStopServerClicked()
 {
+    stopTransmissions();
     controller->stopServer();
 }
 
@@ -103,10 +115,7 @@ void MainWindow::onPushButtonStartTransmissionClicked()
 
 void MainWindow::onPushButtonStopTransmissionClicked()
 {
-    transmissionTimer.stop();
-    controller->outboundTransmissionStopped();
-
-    periodicUpdate();
+    stopTransmissions();
 }
 
 void MainWindow::transmitOutboundData()

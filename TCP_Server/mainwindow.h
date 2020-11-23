@@ -42,5 +42,6 @@ private:
     QTimer transmissionTimer;
 
     void setupStatusBar();
+    void stopTransmissions();
 };
 #endif // MAINWINDOW_H

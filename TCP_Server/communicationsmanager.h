@@ -38,10 +38,10 @@ signals:
 private:
     std::unique_ptr<QTcpSocket> socket;
     int socketPort = 0;
-    bool clientConnected = false;
     bool processBigEndianData = false;
     QReadWriteLock lock;
 
+    void abortSocketConnection();
     QByteArray serializeOutboundData(std::vector<unsigned>& outData);
     std::vector<unsigned> deserializeInboundData(QByteArray inData);
 };

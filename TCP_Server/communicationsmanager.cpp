@@ -22,6 +22,8 @@ void CommunicationsManager::startServer(unsigned port, bool bigEndian)
 {
     QWriteLocker locker(&lock);
 
+    abortSocketConnection();
+
     processBigEndianData = bigEndian;
     socketPort = port;
 
@@ -42,16 +44,16 @@ void CommunicationsManager::startServer(unsigned port, bool bigEndian)
 
 void CommunicationsManager::stopServer()
 {
-    QWriteLocker locker(&lock);
-
-    if(clientConnected)
+    if(isClientConnected())
     {
-        socket->close();
+        abortSocketConnection();
     }
 
     if(isServerListening())
     {
+        lock.lockForWrite();
         close();
+        lock.unlock();
     }
 
     QString msg = "Server stopped.";
@@ -61,12 +63,12 @@ void CommunicationsManager::stopServer()
 
 void CommunicationsManager::sendDataToClient(std::vector<unsigned> data)
 {
-    QReadLocker locker(&lock);
-
-    if(clientConnected && (data.size() > 0))
+    if(isClientConnected() && (data.size() > 0))
     {
+        lock.lockForWrite();
         socket->write(serializeOutboundData(data));
         socket->flush();
+        lock.unlock();
     }
 }
 
@@ -77,12 +79,7 @@ void CommunicationsManager::readIncomingData()
 
 void CommunicationsManager::disconnectedFromSocket()
 {
-    QWriteLocker locker(&lock);
-
-    socket->reset();
-    clientConnected = false;
     startServer(socketPort, processBigEndianData);
-
     emit statusChanged();
 }
 
@@ -90,10 +87,7 @@ void CommunicationsManager::incomingConnection(qintptr socketDescriptor)
 {
     QWriteLocker locker(&lock);
 
-    if(socket != nullptr)
-    {
-        socket->reset();
-    }
+    abortSocketConnection();
 
     socket = std::make_unique<QTcpSocket>();
     socket->setSocketDescriptor(socketDescriptor);
@@ -105,7 +99,6 @@ void CommunicationsManager::incomingConnection(qintptr socketDescriptor)
 
     if(socket->state() == QAbstractSocket::ConnectedState)
     {
-        clientConnected = true;
         msg = "Connected to client on Port " + QString::number(socket->localPort()) + ".";
         emit sendStatusMessage(msg.toStdString());
     }
@@ -118,6 +111,14 @@ void CommunicationsManager::incomingConnection(qintptr socketDescriptor)
     close();
 
     emit statusChanged();
+}
+
+void CommunicationsManager::abortSocketConnection()
+{
+    if(socket != nullptr)
+    {
+        socket->abort();
+    }
 }
 
 QByteArray CommunicationsManager::serializeOutboundData(std::vector<unsigned>& outData)
