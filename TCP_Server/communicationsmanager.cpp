@@ -1,22 +1,21 @@
 #include "communicationsmanager.h"
 #include "commutilities.h"
-#include <QTcpServer>
 #include <QTcpSocket>
 
-CommunicationsManager::CommunicationsManager() = default;
+CommunicationsManager::CommunicationsManager() {}
 
 CommunicationsManager::~CommunicationsManager() = default;
 
 bool CommunicationsManager::isServerListening()
 {
     QReadLocker locker(&lock);
-    return serverListening;
+    return isListening();
 }
 
 bool CommunicationsManager::isClientConnected()
 {
     QReadLocker locker(&lock);
-    return clientConnected;
+    return ((socket != nullptr) && (socket->state() == QAbstractSocket::ConnectedState));
 }
 
 void CommunicationsManager::startServer(unsigned port, bool bigEndian)
@@ -26,22 +25,15 @@ void CommunicationsManager::startServer(unsigned port, bool bigEndian)
     processBigEndianData = bigEndian;
     socketPort = port;
 
-    if(server == nullptr)
-    {
-        server = std::make_unique<QTcpServer>();
-        connect(server.get(), &QTcpServer::newConnection, this, &CommunicationsManager::incomingSocketConnection);
-    }
-
     QString msg = "";
-    if(server->listen(QHostAddress::LocalHost, socketPort))
+    if(listen(QHostAddress::LocalHost, socketPort))
     {
-        serverListening = true;
-        msg = "Server is listening on port " + QString::number(socketPort) + "...";
+        msg = "Server is listening on Port " + QString::number(socketPort) + "...";
         emit sendStatusMessage(msg.toStdString());
     }
     else
     {
-        msg = "Unable to start server on port " + QString::number(socketPort) + "!";
+        msg = "Unable to start server on Port " + QString::number(socketPort) + "!";
         emit sendErrorMessage("Server Error", msg.toStdString());
     }
 
@@ -57,10 +49,9 @@ void CommunicationsManager::stopServer()
         socket->close();
     }
 
-    if(serverListening)
+    if(isServerListening())
     {
-        server->close();
-        serverListening = false;
+        close();
     }
 
     QString msg = "Server stopped.";
@@ -79,39 +70,6 @@ void CommunicationsManager::sendDataToClient(std::vector<unsigned> data)
     }
 }
 
-void CommunicationsManager::incomingSocketConnection()
-{
-    QWriteLocker locker(&lock);
-
-    if(socket != nullptr)
-    {
-        socket->reset();
-    }
-
-    socket = std::make_unique<QTcpSocket>(server->nextPendingConnection());
-
-    connect(socket.get(), &QTcpSocket::readyRead, this, &CommunicationsManager::readIncomingData);
-    connect(socket.get(), &QTcpSocket::disconnected, this, &CommunicationsManager::disconnectedFromSocket);
-
-    QString msg = "";
-    if(socket->state() == QAbstractSocket::ConnectedState)
-    {
-        clientConnected = true;
-        msg = "Connected to client on port " + QString::number(socket->peerPort()) + ".";
-        emit sendStatusMessage(msg.toStdString());
-    }
-    else
-    {
-        msg = "Error encountered when connecting to client!";
-        emit sendErrorMessage("Server Error", msg.toStdString());
-    }
-
-    server->close();
-    serverListening = false;
-
-    emit statusChanged();
-}
-
 void CommunicationsManager::readIncomingData()
 {
     emit receivedDataFromClient(deserializeInboundData(socket->readAll()));
@@ -124,6 +82,40 @@ void CommunicationsManager::disconnectedFromSocket()
     socket->reset();
     clientConnected = false;
     startServer(socketPort, processBigEndianData);
+
+    emit statusChanged();
+}
+
+void CommunicationsManager::incomingConnection(qintptr socketDescriptor)
+{
+    QWriteLocker locker(&lock);
+
+    if(socket != nullptr)
+    {
+        socket->reset();
+    }
+
+    socket = std::make_unique<QTcpSocket>();
+    socket->setSocketDescriptor(socketDescriptor);
+
+    connect(socket.get(), &QTcpSocket::readyRead, this, &CommunicationsManager::readIncomingData);
+    connect(socket.get(), &QTcpSocket::disconnected, this, &CommunicationsManager::disconnectedFromSocket);
+
+    QString msg = "";
+
+    if(socket->state() == QAbstractSocket::ConnectedState)
+    {
+        clientConnected = true;
+        msg = "Connected to client on Port " + QString::number(socket->localPort()) + ".";
+        emit sendStatusMessage(msg.toStdString());
+    }
+    else
+    {
+        msg = "Error encountered when connecting to client!";
+        emit sendErrorMessage("Server Error", msg.toStdString());
+    }
+
+    close();
 
     emit statusChanged();
 }

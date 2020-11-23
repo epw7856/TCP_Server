@@ -5,6 +5,8 @@
 #include "systemdatasource.h"
 
 Q_DECLARE_METATYPE(std::string);
+Q_DECLARE_METATYPE(qintptr);
+Q_DECLARE_METATYPE(std::vector<unsigned>);
 
 MainWindowController::MainWindowController()
 :
@@ -12,6 +14,8 @@ MainWindowController::MainWindowController()
     sds(std::make_unique<SystemDataSource>())
 {
     qRegisterMetaType<std::string>();
+    qRegisterMetaType<std::vector<unsigned>>();
+    qRegisterMetaType<qintptr>();
 
     commsManager->moveToThread(&serverThread);
 

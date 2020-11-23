@@ -4,11 +4,11 @@
 #include <memory>
 #include <QReadWriteLock>
 #include <QObject>
+#include <QTcpServer>
 
-class QTcpServer;
 class QTcpSocket;
 
-class CommunicationsManager : public QObject
+class CommunicationsManager : public QTcpServer
 {
     Q_OBJECT
 
@@ -24,9 +24,11 @@ public slots:
     void sendDataToClient(std::vector<unsigned> data);
 
 private slots:
-    void incomingSocketConnection();
     void readIncomingData();
     void disconnectedFromSocket();
+
+protected:
+    void incomingConnection(qintptr socketDescriptor) override;
 
 signals:
     void receivedDataFromClient(std::vector<unsigned> data);
@@ -35,10 +37,8 @@ signals:
     void statusChanged();
 
 private:
-    std::unique_ptr<QTcpServer> server;
     std::unique_ptr<QTcpSocket> socket;
     int socketPort = 0;
-    bool serverListening = false;
     bool clientConnected = false;
     bool processBigEndianData = false;
     QReadWriteLock lock;
