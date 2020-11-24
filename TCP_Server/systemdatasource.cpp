@@ -213,15 +213,15 @@ bool SystemDataSource::parseDataTypes(JsonDataSection section)
 
 DataType SystemDataSource::stringToDataType(const QString& value) const
 {
-    if(value.toLower() == "unsigned")
+    if(value == "Unsigned")
     {
         return DataType::Unsigned;
     }
-    else if(value.toLower() == "float")
+    else if(value == "Float")
     {
         return DataType::Float;
     }
-    else if(value.toLower() == "int")
+    else if(value == "Integer")
     {
         return DataType::Int;
     }
