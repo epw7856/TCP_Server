@@ -38,7 +38,6 @@ public slots:
 signals:
     void updateUI();
     void sendInboundDataToUI(std::string data);
-    void updateInboundData(std::string msg);
     void sendStatusBarMessage(std::string msg);
 
     void requestStartServer(unsigned port, bool processBigEndian);

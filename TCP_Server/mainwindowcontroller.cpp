@@ -175,7 +175,7 @@ void MainWindowController::receivedDataFromClient(std::vector<unsigned> data)
     std::string dataToUI;
     if(sds->convertInboundData(data, dataToUI))
     {
-        emit updateInboundData(dataToUI);
+        emit sendInboundDataToUI(dataToUI);
         inboundDataError = false;
     }
     else if(!inboundDataError)

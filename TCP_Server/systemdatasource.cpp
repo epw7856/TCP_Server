@@ -114,7 +114,7 @@ bool SystemDataSource::convertInboundData(std::vector<unsigned>& inboundData, st
 
         if(i < inboundData.size() - 1)
         {
-            dataSet += "/n";
+            dataSet += "\n";
         }
 
         rawData = dataSet.toStdString();
